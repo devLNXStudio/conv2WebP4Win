@@ -1,38 +1,36 @@
 # conv2WebP4Win
 
-Aplikacja Windows do konwersji obrazów na format WebP, stworzona w .NET 8.
+A Windows application for converting images to WebP format, built with .NET 8.
 
-## Funkcje
+## Features
 
-- Konwersja plików graficznych do formatu WebP
-- Prosty i intuicyjny interfejs u¿ytkownika
-- Obs³uga wielu plików jednoczeœnie
+- Convert image files to WebP format  
+- Simple and intuitive user interface  
+- Batch processing support for multiple files  
 
-## Wymagania
+## Requirements
 
-- Windows 10/11
-- .NET 8 Runtime
+- Windows 10/11  
+- .NET 8 Runtime  
 
-## Instalacja
+## Installation
 
-1. Pobierz najnowsz¹ wersjê aplikacji z [Releases](https://github.com/devLNXStudio/conv2WebP4Win/releases).
-2. Rozpakuj archiwum i uruchom plik `Installer.exe`.
+1. Download the latest version from the [Releases](https://github.com/devLNXStudio/conv2WebP4Win/releases) page.  
+2. Extract the archive and run the `conv2WebP4Win.exe` file to install.  
 
-## U¿ycie
+## Usage
 
-1. Uruchom aplikacjê.
-2. Wybierz pliki do konwersji.
-3. Wska¿ folder docelowy.
-4. Kliknij "Konwertuj".
+After installation, a new context menu entry will appear for JPG/JPEG and GIF files.  
+Right-click a supported image file and select **Convert to WebP** to start the conversion process.
 
-## Wk³ad
+## Contributing
 
-Chêtnie przyjmujemy pull requesty i zg³oszenia b³êdów!
+Pull requests and bug reports are welcome!
 
-## Licencja
+## License
 
-Projekt dostêpny na licencji MIT.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-> Stworzono w .NET 8
+> Built with .NET 8
