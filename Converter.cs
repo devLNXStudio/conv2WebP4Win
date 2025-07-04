@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using conv2WebP4Win;
 
 namespace WebPConverter
 {
@@ -27,14 +28,16 @@ namespace WebPConverter
 
                 if (!File.Exists(filePath))
                 {
-                    MessageBox.Show($"Plik nie istnieje: {filePath}", "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(
+                        string.Format(Strings.msgFileNotExists,filePath), Strings.genError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //$"Plik nie istnieje: {filePath}", 
                     return;
                 }
 
                 if (!IsImageFile(filePath))
                 {
-                    MessageBox.Show("Plik nie jest obsługiwanym formatem graficznym (JPG lub PNG).",
-                        "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(Strings.convBadFormat,
+                        Strings.genError, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -42,8 +45,8 @@ namespace WebPConverter
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Wystąpił błąd podczas konwersji:\n\n{ex.Message}",
-                    "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format(Strings.convRunError, ex.Message),
+                    Strings.genError, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -61,8 +64,10 @@ namespace WebPConverter
             // Sprawdź, czy plik już istnieje
             if (File.Exists(outputPath))
             {
-                var result = MessageBox.Show($"Plik {Path.GetFileName(outputPath)} już istnieje. Czy chcesz go nadpisać?",
-                    "Plik istnieje", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                var result = MessageBox.Show(
+                    string.Format( Strings.convFileExists, Path.GetFileName(outputPath)),
+                    //$"Plik {Path.GetFileName(outputPath)} już istnieje. Czy chcesz go nadpisać?",
+                    Strings.genErrFileExists, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
                 if (result == DialogResult.No)
                 {
@@ -94,8 +99,12 @@ namespace WebPConverter
             }
 
             // Wyświetl potwierdzenie tylko jeśli konwersja zakończyła się sukcesem
-            MessageBox.Show($"Plik został pomyślnie przekonwertowany do WebP:\n{outputPath}",
-                "Konwersja zakończona", MessageBoxButtons.OK, MessageBoxIcon.Information);
+#pragma warning disable CA1416 // Walidacja zgodności z platformą
+            _=MessageBox.Show(
+                string.Format(Strings.convSuccessConv, outputPath),
+                //$"Plik został pomyślnie przekonwertowany do WebP:\n{outputPath}",
+                Strings.msgSuccess, MessageBoxButtons.OK, MessageBoxIcon.Information);
+#pragma warning restore CA1416 // Walidacja zgodności z platformą
         }
 
         public static void InstallContextMenu(bool install = true)

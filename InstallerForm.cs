@@ -1,23 +1,26 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
+﻿using System.Diagnostics;
 using System.Net;
-using System.Reflection;
-using System.Windows.Forms;
 using Microsoft.Win32;
+using conv2WebP4Win;
 
 namespace WebPConverter
 {
     public partial class InstallerForm : Form
     {
         private const string AppName = "WebP Converter";
-        private const string AppVersion = "1.0.0";
+        private const string AppVersion = "1.1.0";
         private string installPath;
         private string converterPath;
         private readonly string tempPath = Path.Combine(Path.GetTempPath(), "WebPConverterTemp");
 
         public InstallerForm()
         {
+            // Wymuś angielski dla wszystkich języków poza polskim
+            var culture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+            if (culture != "pl")
+            {
+                Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("en");
+            }
             InitializeComponent();
             installPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "WebPConverter");
             converterPath = Path.Combine(installPath, "WebPConverter.exe");
@@ -34,16 +37,18 @@ namespace WebPConverter
 
             var label = new Label
             {
-                Text = "Konwerter JPG/PNG do WebP - Instalator",
+                //Text = "Konwerter JPG/PNG do WebP - Instalator",
+                Text = Strings.labelTitle,
                 Font = new System.Drawing.Font("Segoe UI", 14, System.Drawing.FontStyle.Bold),
                 TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
                 Dock = DockStyle.Top,
-                Height = 50
+                Height = 50,
+                AutoSize = false
             };
 
             var descriptionLabel = new Label
             {
-                Text = "Ta aplikacja zainstaluje konwerter grafiki do formatu WebP i doda odpowiednie pozycje do menu kontekstowego Windows.",
+                Text = Strings.labelSTitle,
                 TextAlign = System.Drawing.ContentAlignment.TopLeft,
                 Location = new System.Drawing.Point(20, 60),
                 Size = new System.Drawing.Size(460, 80)
@@ -61,26 +66,33 @@ namespace WebPConverter
 
             var statusLabel = new Label
             {
-                Text = "Gotowy do instalacji",
+                Text =Strings.labelReady,
                 TextAlign = System.Drawing.ContentAlignment.MiddleLeft,
                 Location = new System.Drawing.Point(20, 200),
                 Size = new System.Drawing.Size(460, 25),
                 Name = "statusLabel"
             };
 
+            var buttonSpacing = 20;
+            var buttonWidth = 100;
+            var buttonHeight = 30;
+
+            int totalWidth = buttonWidth * 2 + buttonSpacing;
+            int startX = (this.ClientSize.Width - totalWidth) / 2;
+
             var installButton = new Button
             {
-                Text = "Zainstaluj",
-                Location = new System.Drawing.Point(280, 270),
-                Size = new System.Drawing.Size(100, 30),
+                Text = Strings.btnInstall,
+                Size = new Size(buttonWidth, buttonHeight),
+                Location = new Point(startX, 270),
                 Name = "installButton"
             };
 
             var cancelButton = new Button
             {
-                Text = "Anuluj",
-                Location = new System.Drawing.Point(390, 270),
-                Size = new System.Drawing.Size(100, 30),
+                Text = Strings.btnCancel,
+                Size = new Size(buttonWidth, buttonHeight),
+                Location = new Point(startX + buttonWidth + buttonSpacing, 270),
                 Name = "cancelButton"
             };
 
@@ -90,6 +102,7 @@ namespace WebPConverter
             this.Controls.Add(label);
             this.Controls.Add(descriptionLabel);
             this.Controls.Add(progressBar);
+            progressBar.Left = (this.ClientSize.Width - progressBar.Width) / 2;
             this.Controls.Add(statusLabel);
             this.Controls.Add(installButton);
             this.Controls.Add(cancelButton);
@@ -115,14 +128,14 @@ namespace WebPConverter
                 // Sprawdź czy aplikacja jest uruchomiona jako administrator
                 if (!IsAdministrator())
                 {
-                    MessageBox.Show("Ta aplikacja wymaga uprawnień administratora. Uruchom ponownie jako administrator.",
-                        "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(Strings.msgAdmin,
+                        Strings.genError, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Invoke(new Action(() => Close()));
                     return;
                 }
 
                 // Aktualizacja statusu
-                UpdateStatus("Tworzenie katalogu instalacyjnego...", 10);
+                UpdateStatus(Strings.statUpd, 10);
 
                 // Utwórz katalog instalacyjny
                 if (!Directory.Exists(installPath))
@@ -137,35 +150,35 @@ namespace WebPConverter
                 }
 
                 // Sprawdź czy ImageMagick jest już zainstalowany
-                UpdateStatus("Sprawdzanie, czy ImageMagick jest zainstalowany...", 20);
+                UpdateStatus(Strings.statUpdIM, 20);
                 bool imagemagickInstalled = IsImageMagickInstalled();
 
                 if (!imagemagickInstalled)
                 {
                     // Pobierz i zainstaluj ImageMagick
-                    UpdateStatus("Pobieranie ImageMagick...", 30);
+                    UpdateStatus(Strings.statUpdIM2, 30);
                     string imagemagickInstallerPath = DownloadImageMagick();
 
-                    UpdateStatus("Instalowanie ImageMagick...", 40);
+                    UpdateStatus(Strings.statUpdIM3, 40);
                     InstallImageMagick(imagemagickInstallerPath);
                 }
                 else
                 {
-                    UpdateStatus("ImageMagick jest już zainstalowany.", 40);
+                    UpdateStatus(Strings.statUpdIM4, 40);
                 }
 
                 // Utwórz plik konwertera
-                UpdateStatus("Tworzenie pliku konwertera...", 60);
+                UpdateStatus(Strings.statUpd1, 60);
                 CreateConverterExe();
 
                 // Dodaj wpisy do rejestru
-                UpdateStatus("Dodawanie wpisów do rejestru Windows...", 80);
+                UpdateStatus(Strings.statUpd2, 80);
                 AddRegistryEntries();
 
                 // Zakończenie instalacji
-                UpdateStatus("Instalacja zakończona pomyślnie!", 100);
-                MessageBox.Show("Instalacja zakończona pomyślnie!\n\nMożesz teraz konwertować pliki JPG i PNG do formatu WebP poprzez menu kontekstowe.",
-                    "Sukces", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                UpdateStatus(Strings.statUpd3, 100);
+                MessageBox.Show(Strings.msgSuccess,
+                    Strings.genSuccess, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 // Wyczyść pliki tymczasowe
                 try
@@ -182,12 +195,12 @@ namespace WebPConverter
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Wystąpił błąd podczas instalacji:\n\n{ex.Message}", "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format(Strings.genErrorMsg, ex.Message), Strings.genError, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Invoke(new Action(() =>
                 {
                     var installButton = (Button)Controls.Find("installButton", true)[0];
                     installButton.Enabled = true;
-                    UpdateStatus("Instalacja nie powiodła się.", 0);
+                    UpdateStatus(Strings.genFailed, 0);
                 }));
             }
         }
@@ -276,7 +289,7 @@ namespace WebPConverter
 
             if (process.ExitCode != 0)
             {
-                throw new Exception("Instalacja ImageMagick nie powiodła się.");
+                throw new Exception(Strings.genIMError);
             }
         }
 
@@ -318,25 +331,41 @@ if (Test-Path -Path $outputPath) {
             // Dodaj wpisy do rejestru dla JPG
             using (var key = Registry.ClassesRoot.CreateSubKey(@"SystemFileAssociations\.jpg\shell\ConvertToWebP"))
             {
-                key.SetValue("", "Konwertuj do WebP");
+                key.SetValue("", Strings.regEntry);
                 key.SetValue("Icon", "shell32.dll,43");
             }
 
             using (var key = Registry.ClassesRoot.CreateSubKey(@"SystemFileAssociations\.jpg\shell\ConvertToWebP\command"))
             {
-                key.SetValue("", $"powershell.exe -ExecutionPolicy Bypass -File \"{converterPath}\" -FilePath \"%1\"");
+                key.SetValue("", $"powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File \"{converterPath}\" -FilePath \"%1\"");
+
             }
+
+            // Dodaj wpisy do rejestru dla JPEG
+            using (var key = Registry.ClassesRoot.CreateSubKey(@"SystemFileAssociations\.jpeg\shell\ConvertToWebP"))
+            {
+                key.SetValue("", Strings.regEntry);
+                key.SetValue("Icon", "shell32.dll,43");
+            }
+
+            using (var key = Registry.ClassesRoot.CreateSubKey(@"SystemFileAssociations\.jpeg\shell\ConvertToWebP\command"))
+            {
+                key.SetValue("", $"powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File \"{converterPath}\" -FilePath \"%1\"");
+
+            }
+
 
             // Dodaj wpisy do rejestru dla PNG
             using (var key = Registry.ClassesRoot.CreateSubKey(@"SystemFileAssociations\.png\shell\ConvertToWebP"))
             {
-                key.SetValue("", "Konwertuj do WebP");
+                key.SetValue("",Strings.regEntry);
                 key.SetValue("Icon", "shell32.dll,43");
             }
 
             using (var key = Registry.ClassesRoot.CreateSubKey(@"SystemFileAssociations\.png\shell\ConvertToWebP\command"))
             {
-                key.SetValue("", $"powershell.exe -ExecutionPolicy Bypass -File \"{converterPath}\" -FilePath \"%1\"");
+                key.SetValue("", $"powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File \"{converterPath}\" -FilePath \"%1\"");
+
             }
         }
     }
